@@ -1,84 +1,83 @@
 const fs = require("fs");
 const util = require("util");
+const hexRefs = require('./hexRefs.js');
 
 const writeFileAsync = util.promisify(fs.writeFile);
 
-const hexRefs = {
-    //betas
-    "JOHN": "",
-    "JUNE": "", 
-    "EB": "",
-    "ROSE": "",
-    "DAVE": "",
-    "JADE": "",
-    //alphas
-    "JANE": "",
-    "ROXY": "", 
-    "DIRK": "",
-    "JAKE": "", 
-    "GT": "", 
-    //beta trolls
-    "ARADIA": "", 
-    "AA": "", 
-    "TAVROS": "", 
-    "AT": "", 
-    "SOLLUX": "", 
-    "TA": "",
-    "KARKAT": "",
-    "CG": "",
-    "NEPETA": "", 
-    "AC": "",
-    "KANAYA": "", 
-    "GA": "", 
-    "TEREZI": "",
-    "GC": "",
-    "VRISKA": "",
-    "AG": "", 
-    "EQUIUS": "",
-    "CT": "", 
-    "GAMZEE": "", 
-    "TC": "", 
-    "ERIDAN": "",
-    "CA": "", 
-    "FEFERI": "", 
-    "CC": "",
-    //alpha trolls 
-    "DAMARA": "",
-    "RUFIOH": "", 
-    "MITUNA": "", 
-    "KANKRI": "", 
-    "MEULIN": "",
-    "PORRIM": "",
-    "LATULA": "", 
-    "ARANEA": "", 
-    "HORUSS": "", 
-    "KURLOZ": "",
-    "CRONUS": "", 
-    "MEENAH": "",
-    //other 
-    "HAL": ""
-}
 
-const doubles = ["TT","TG","GG"]
+
+let outputData = "";
+
+const unformatted = [];
 
 // "utf8" encodes the raw buffer data in human-readable format
-fs.readFileAsText("unformated.txt", "utf8", function(error, data) {
+fs.readFile("data.txt", "utf8", function (error, data) {
 
     if (error) {
-      return console.log(error);
+        return console.log(error);
     }
-  
-    console.log(data);
-    //split data by two newline 
-    //iterate
-        //split that by newline 
-            //do stuff on that 
-  
+
+    splitData(data);
+
 });
 
-//check if key exists 
-//if it does, proceed, otherwise add to an array to be manually modified 
+splitData = (data) => {
+    //add in inital html
+    outputData +=
+        `<!DOCTYPE html>
+        <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Color Text</title>
+                <link rel="stylesheet" href="style.css">
+            </head>
+            <body>`
 
+    //split data by two newline 
+    const log = data.split("\n\n");
+    //iterate
+    for (let i = 0; i < log.length; i++) {
+        //split that by newline 
+        let lines = log[i].split("\n");
+        //do stuff on that 
+        outputData += `<p>`
+        for (let j = 0; j < lines.length; j++) {
+            outputData += generateLineHTML(lines[j]);
+            outputData += `<br>`
+        }
+        outputData += `</p>`
+    }
+    //add in unformatted 
+    outputData += `<hr><h1>UNFORMATTED LINES</h1>`
+    for (let i = 0; i < unformatted.length; i++) {
+        outputData += `<p>${unformatted[i]}</p>`
+    }
 
-// const html = generateHTML(answers);
-// return writeFileAsync("index.html", html);
+    //finish html
+    outputData += `</body>
+    </html>`
+
+    //write file
+    return writeFileAsync("index.html", outputData);
+}
+
+generateLineHTML = (str) => {
+    //index of colon
+    const colIndex = str.search(":");
+    //get key
+    const key = str.substring(0, colIndex);
+    const hexCode = hexRefs[key];
+    //strip off beginning before colon
+    let substrIndex = colIndex + 1;
+    if (str.substring(colIndex + 1, colIndex + 2) === " ") {
+        substrIndex++;
+    }
+    if (hexCode) {
+        return `<span style='color:${hexCode}'>${str.substr(substrIndex)}</span>`
+    } else {
+        unformatted.push(str);
+        return `<span>${str}</span>`
+
+    }
+}

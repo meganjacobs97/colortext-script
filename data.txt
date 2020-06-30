@@ -1,0 +1,8 @@
+GREEN: This text is green. 
+RED: This text is red. 
+YELLOW: Yellow here. 
+
+BLUE: This text is blue!
+PURPLE: And this is purple. 
+RED: And here's red again. 
+ORANGE: But what about orange?
